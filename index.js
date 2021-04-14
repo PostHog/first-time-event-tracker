@@ -3,10 +3,6 @@ async function setupPlugin({ config, global }) {
 }
 
 async function processEvent(event, { global, storage }) {
-    if (event.event === 'session_started') {
-        return event
-    }
-
     const THIRTY_MINUTES = 1000 * 60 * 30
 
     const userSeenInLastHalfHour = await cache.get(`user_seen_${event.distinct_id}`)
