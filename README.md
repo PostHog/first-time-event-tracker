@@ -10,5 +10,3 @@ This plugin will add the following two properties to events you specify:
 
 - `is_event_first_ever`
 - `is_event_first_for_user`
-
-
