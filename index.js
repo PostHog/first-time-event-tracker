@@ -3,34 +3,30 @@ async function setupPlugin({ config, global }) {
 }
 
 async function processEvent(event, { global, storage }) {
-    if (event.event === 'session_started') {
-        return event
+    const THIRTY_MINUTES = 1000 * 60 * 30
+
+    const userSeenInLastHalfHour = await cache.get(`user_seen_${event.distinct_id}`)
+    const isFirstEventInSession = !!userSeenInLastHalfHour
+
+    if (!userSeenInLastHalfHour) {
+        await cache.set(`user_seen_${event.distinct_id}`, 1)
     }
 
-    const THIRTY_MINUTES = 1000*60*30
-    const timestamp = event.timestamp || event.data?.timestamp || event.properties?.timestamp || event.now || event.sent_at
-    const userLastSeen = await storage.get(`last_seen_${event.distinct_id}`)
-    let isFirstEventInSession = false
+    await cache.expire(`user_seen_${event.distinct_id}`, THIRTY_MINUTES)
 
-    if (timestamp) {
-        const parsedTimestamp = new Date(timestamp).getTime()
-        const timeSinceLastSeen = parsedTimestamp - (userLastSeen || 0)
-        isFirstEventInSession = timeSinceLastSeen > THIRTY_MINUTES
-        storage.set(`last_seen_${event.distinct_id}`, parsedTimestamp)
 
-        if (isFirstEventInSession) {
-            posthog.capture(
-                'session_started', 
-                { 
-                    distinct_id: event.distinct_id, 
-                    time_since_last_seen: timeSinceLastSeen,
-                    timestamp: timestamp, // backdate to when session _actually_ started
-                    trigger_event: event.event
-                }
-            )
-        }
-        
+    if (event.timestamp && isFirstEventInSession) {
+        posthog.capture(
+            'session_started',
+            {
+                distinct_id: event.distinct_id,
+                time_since_last_seen: timeSinceLastSeen,
+                timestamp: event.timestamp, // backdate to when session _actually_ started
+                trigger_event: event.event
+            }
+        )
     }
+
 
     event.properties['is_first_event_in_session'] = isFirstEventInSession
 
