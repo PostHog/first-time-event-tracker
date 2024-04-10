@@ -1,7 +1,7 @@
 {
   "name": "First Time Event Tracker",
   "url": "https://github.com/PostHog/first-time-event-tracker",
-  "description": "Track if a given event is the first event of this type for a user.",
+  "description": "Deprecated, will be skipped if process_person=false",
   "main": "index.js",
   "config": [
     {
