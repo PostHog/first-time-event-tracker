@@ -1,6 +1,6 @@
 # First Time Event Tracker Plugin
 
-This plugin is deprecated, it will be skipped in `process_persons=false` mode.
+This plugin is deprecated.
 
 ## Important!
 
